@@ -67,7 +67,16 @@ function drawVisualization() {
 
 // Make a callback function for the select event
     var onselect = function () {
-        timeline.deleteAllItems();
+        //timeline.deleteAllItems();
+
+        var startData = Number(timeline.start);
+        var endData = Number(timeline.end);
+        console.log(startData);
+        console.log(endData);
+        console.log(timeline.getSelection());
+        //console.log(item);
+
+
     };
 
     // callback function for the change event
@@ -82,7 +91,7 @@ function drawVisualization() {
     //};
 
     // Add event listeners
-    google.visualization.events.addListener(timeline, 'change', onselect);
+    google.visualization.events.addListener(timeline, 'changed', onselect);
     //google.visualization.events.addListener(timeline, 'change', onchange);
 
 
@@ -91,3 +100,5 @@ function drawVisualization() {
 
 }
 
+
+//http://almende.github.io/chap-links-library/js/timeline/doc/#Events
