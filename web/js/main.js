@@ -1,149 +1,93 @@
-var items = new vis.DataSet({
-    type: { start: 'ISODate', end: 'ISODate' }
-});
+var timeline;
 
-var projectNames = Array('first', 'second', 'third');
-console.log(projectNames.length);
+google.load("visualization", "1");
 
-//var a = [{
-//    id: 'first', className: projectNames[0], content:'first', subgroupOrder: 'subgroupOrder1'
-//},{
-//    id: 'second', className: projectNames[1], content:'second', subgroupOrder: 'subgroupOrder2' // this group has no subgroups but this would be the other method to do the sorting.
-//},{
-//    id: 'third', className: projectNames[3], content:'third', subgroupOrder: 'subgroupOrder3' // this group has no subgroups but this would be the other method to do the sorting.
-//}];
+// Set callback to run when API is loaded
+google.setOnLoadCallback(drawVisualization);
 
-//var groups = new vis.DataSet(a);
+// Called when the Visualization API is loaded.
+function drawVisualization() {
+    // Create and populate a data table.
+    var data = new google.visualization.DataTable();
+    data.addColumn('datetime', 'start');
+    data.addColumn('datetime', 'end');
+    data.addColumn('string', 'content');
+    data.addColumn('string', 'group');
 
+    var order = 1;
+    for (var truck = 11; truck < 15; truck++) {
+        var date = new Date(2010, 12, 14, 8, 0, 0);
+        for (var i = 0; i < 10; i++) {
+            date.setHours(date.getHours() +  4 * (Math.random() < 0.2));
+            var start = new Date(date);
 
-var i = 0;
-var j = 0;
-var groups = [];
-while (i < projectNames.length) {
-    groups.push({
-        id: projectNames[i],
-        className: projectNames[i] + '-company',
-        content: projectNames[i],
-        subgroupOrder: projectNames[i]
-    });
-    i++;
-}
-while (j < projectNames.length - 1) {
-    items.add([
-        {
-            id: projectNames[j],
-            className: projectNames[j] + '-project-class edit-project-name',
-            content: projectNames[j] + '_content',
-            start: '2014-01-26',
-            end: '2014-02-26',
-            group: projectNames[j],
-            subgroup: 'sg_1',
-            subgroupOrder: 1
+            date.setHours(date.getHours() + 2 + Math.floor(Math.random()*4));
+            var end = new Date(date);
+
+            var orderText = "Order " + order;
+            if (Math.random() < 0.25) {
+                orderText = "<img src='img/product-icon.png' style='width:32px; height:32px; vertical-align: middle'> " + orderText;
+            }
+            orderText = "<div title='Order " + order + "' class='order'>" + orderText + "</div>";
+
+            var truckText = "<img src='img/truck-icon.png' style='width:24px; height:24px; vertical-align: middle'>" +
+                "Truck " + truck;
+            data.addRow([start, end, orderText, truckText]);
+            order++;
         }
+    }
 
-    ]);
-    j++;
-}
-var container = document.getElementById('visualization');
-var options = {
+    var options = {
+        editable: true,
+        "width":  "100%",
+        "height": 'auto',
+        "style": "box",
+        layout: "box",
+        selectable: true,
+        eventMargin: 10,  // minimal margin between events
+        eventMarginAxis: 20, // minimal margin beteen events and the axis
+        showMajorLabels: false,
+        axisOnTop: true,
+        groupsChangeable : true,
+        groupsOnRight: false,
+        showCurrentTime: true,
+        zoomable: false,
+        showNavigation: true,
+        showButtonNew: true,
+        moveable: false
 
-    timeAxis: {step: 2},
-    orientation:'top',
-    start: '2014-01-10',
-    end: '2014-07-10',
-    editable: {
-        add: true,         // add new items by double tapping
-        updateTime: true,  // drag items horizontally
-        updateGroup: true, // drag items from one group to another
-        remove: true       // delete an item by tapping the delete button top right
-    },
-    onAdd: function (item, callback) {
-        item.id = parseInt(projectNames.length) + 1;
-        item.content = prompt('Enter text content for new item:', item.content);
-        item.className = 'new-project' + parseInt(projectNames.length + 1);
-        item.start = '2014-03-26';
-        item.end = '2014-04-26';
-        if (item.content != null) {
-            callback(item); // send back adjusted new item
-        }
-        else {
-            callback(null); // cancel item creation
-        }
-    },
-    //onUpdate: function (item, callback) {
-    //    item.content = prompt('Edit items text:', item.content);
-    //    if (item.content != null) {
-    //        callback(item); // send back adjusted item
+    };
+
+    // Instantiate our timeline object.
+    timeline = new links.Timeline(document.getElementById('mytimeline'), options);
+    timeline.setScale(links.Timeline.StepDate.SCALE.DAY, 7);
+    // Draw our timeline with the created data and options
+    timeline.draw(data);
+
+
+// Make a callback function for the select event
+    var onselect = function () {
+        timeline.deleteAllItems();
+    };
+
+    // callback function for the change event
+    //var onchange = function () {
+    //    var sel = timeline.getSelection();
+    //    if (sel.length) {
+    //        if (sel[0].row != undefined) {
+    //            var row = sel[0].row;
+    //            document.getElementById("info").innerHTML += "event " + row + " changed<br>";
+    //        }
     //    }
-    //    else {
-    //        callback(null); // cancel updating the item
-    //    }
-    //},
+    //};
+
+    // Add event listeners
+    google.visualization.events.addListener(timeline, 'change', onselect);
+    //google.visualization.events.addListener(timeline, 'change', onchange);
 
 
-    autoResize: true,
-    zoomable: false,
-    moveable: false,
-    showMajorLabels: false
-    //showMinorLabels: false,
-    //stack: false
-};
-
-var timeline = new vis.Timeline(container, items, groups, options);
 
 
-/**
- * Move the timeline a given percentage to left or right
- * @param {Number} percentage   For example 0.1 (left) or -0.1 (right)
- */
-function move (percentage) {
-    var range = timeline.getWindow();
-    var interval = range.end - range.start;
-
-
-    timeline.setWindow({
-        start: range.start.valueOf() - interval * percentage,
-        end:   range.end.valueOf()   - interval * percentage
-    });
 
 }
-
-
-document.getElementById('moveLeft').onclick  = function () { move( 0.4); };
-document.getElementById('moveRight').onclick = function () { move(-0.4); };
-
-
-
-//---------------------------------------------EDIT PROJECTS--------------------------------------//
-function replaceHTML()
-{
-    console.log('ssdfg');
-    oldText = $(this).html().replace(/"/g, "");
-    $(this).html("").html("<form><input type=\"text\" class=\"editBox\" value=\"" + oldText + "\" /> </form><a href=\"#\" class=\"btnSave\">Save changes</a><a href=\"#\" class=\"btnDiscard\">Discard changes</a>");
-}
-
-$('.edit-project-name .vis-item-content').each(function(){
-    $(this).hover(
-        function(){
-            $(this).addClass("editHover");
-            $(".editHover").bind("dblclick", replaceHTML);
-        },
-        function(){
-            $(this).removeClass("editHover");
-            console.log(this);
-
-            //newText = $(this).siblings("form").children(".editBox").val().replace(/"/g, "");
-            //
-            //$(this).parent().html(newText);
-        }
-    );
-
-
-
-    //$(this).bind('dblclick', function(){
-    //    oldText = $(this).html().replace(/"/g, "");
-    //    $(this).html("").html("<input type=\"text\" class=\"editBox\" value=\"" + oldText + "\" />");
-    //});
-
-});
 

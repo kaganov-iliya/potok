@@ -2,6 +2,7 @@
 /* @var $this yii\web\View */
 $this->title = 'My Yii Application';
 ?>
+<script type="text/javascript" src="http://www.google.com/jsapi"></script>
 <div class="site-index">
 
     <div class="jumbotron">
@@ -14,9 +15,15 @@ $this->title = 'My Yii Application';
 
     <div class="body-content">
 
-        <div id="visualization"></div>
-        <input type="button" id="moveLeft" value="Move left"/>
-        <input type="button" id="moveRight" value="Move right"/>
+<!--        <div id="visualization"></div>-->
+<!--        <input type="button" id="moveLeft" value="Move left"/>-->
+<!--        <input type="button" id="moveRight" value="Move right"/>-->
+
+
+
+        <div id="mytimeline"></div>
+
+
 
     </div>
 </div>
